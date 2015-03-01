@@ -1,0 +1,39 @@
+#!/bin/bash
+
+#------------------------------------------------------------------------------
+# Wait for the network:
+#------------------------------------------------------------------------------
+
+[ "$WAIT_IFACE" ] && {
+
+  RETRIES=20
+
+  echo "[Init] Waiting for ${WAIT_IFACE} network..."
+
+  while [ $RETRIES -gt 0 ]; do
+    ip -o a | grep -q $WAIT_IFACE && break
+    sleep 1; RETRIES=$((RETRIES - 1))
+  done
+
+  [ $RETRIES -eq 0 ] && {
+    echo "[Init] There is no ${WAIT_IFACE} network"
+    exit 1
+  }
+
+  echo "[Init] Interface ${WAIT_IFACE} is present"
+}
+
+#------------------------------------------------------------------------------
+# Configure the service:
+#------------------------------------------------------------------------------
+
+echo '[Init] Configuring the service...'
+
+#------------------------------------------------------------------------------
+# Run:
+#------------------------------------------------------------------------------
+
+echo "[Init] Executing: $*"
+while true; do echo 'Hello World'; sleep 1; done
+
+#exec $*

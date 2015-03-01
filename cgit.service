@@ -1,0 +1,56 @@
+[Unit]
+Description=CGit Server
+After=docker.service boot.service
+Requires=docker.service gito.service
+Wants=boot.service
+
+[Service]
+Restart=on-failure
+RestartSec=20
+TimeoutStartSec=0
+
+#---------------------------------
+# Preparations for the container:
+#---------------------------------
+
+ExecStartPre=-/usr/sbin/docker kill cgit01
+ExecStartPre=-/usr/sbin/docker rm cgit01
+ExecStartPre=-/usr/sbin/docker pull h0tbird/cgit:latest
+
+#----------------------
+# Start the container:
+#----------------------
+
+ExecStart=/usr/bin/sh -c "docker run -t \
+  --volumes-from gito01 \
+  --hostname     cgit01.demo.lan \
+  --name         cgit01 \
+  --net          none \
+  --env          WAIT_IFACE=eth1 \
+  h0tbird/cgit:latest"
+
+#--------------------------------
+# Setup the container's network:
+#--------------------------------
+
+ExecStartPost=/usr/sbin/sleep 2
+ExecStartPost=/usr/bin/sh -c " \
+  PID=$(docker inspect --format='{{ .State.Pid }}' cgit01); \
+  [ ! -d /var/run/netns ] && mkdir -p /var/run/netns; \
+  ln -fs /proc/$PID/ns/net /var/run/netns/$PID; \
+  [ -f /run/dhcpcd-eth1* ] && rm -f /run/dhcpcd-eth1*; \
+  ip link add cgit01-int type veth peer name veth-cgit01; \
+  ip link set veth-cgit01 master br0; \
+  ip link set veth-cgit01 up; \
+  ip link set netns $PID dev cgit01-int; \
+  ip netns exec $PID ip link set cgit01-int name eth1; \
+  ip netns exec $PID dhcpcd -4 -A -c /bin/true -q eth1 -h cgit01"
+
+#---------------------
+# Stop the container:
+#---------------------
+
+ExecStop=/usr/sbin/docker stop cgit01
+
+[Install]
+WantedBy=multi-user.target
