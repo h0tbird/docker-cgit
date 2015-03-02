@@ -29,11 +29,14 @@
 
 echo '[Init] Configuring the service...'
 
+[ "$SERVER_NAME" ] && {
+  sed -i "s/XXX-SERVER_NAME-XXX/$SERVER_NAME/" /etc/httpd/conf/httpd.conf
+  sed -i "s/XXX-SERVER_NAME-XXX/$SERVER_NAME/" /etc/httpd/conf.d/25-cgit.conf
+}
+
 #------------------------------------------------------------------------------
 # Run:
 #------------------------------------------------------------------------------
 
 echo "[Init] Executing: $*"
-while true; do echo 'Hello World'; sleep 1; done
-
-#exec $*
+exec $*

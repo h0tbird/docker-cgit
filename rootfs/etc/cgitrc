@@ -1,0 +1,138 @@
+# Do not cache
+nocache=1
+
+# Enable caching of up to 'n' output entries
+cache-size=0
+
+# Don't index site
+robots=noindex, nofollow
+
+# Specify the css url
+css=/cgit-data/cgit.css
+
+# Show extra links for each repository on the index page
+enable-index-links=1
+
+# Enable ASCII art commit history graph on the log pages
+enable-commit-graph=1
+
+# Show number of affected files per commit on the log pages
+enable-log-filecount=1
+
+# Show number of added/removed lines per commit on the log pages
+enable-log-linecount=1
+
+# Add a cgit favicon
+#favicon=/favicon.ico
+
+# Use a custom logo
+logo=/cgit-data/cgit.png
+
+# Show number of tags
+summary-tags=10
+
+# Enable statistics per week, month and quarter
+max-stats=week
+
+# Set the title and heading of the repository index page
+root-title=Welcome to Git Central
+
+# Set a subheading for the repository index page
+root-desc=One Source to Track Them All
+
+# Include some more info about this site on the index page
+#root-readme=/var/www/html/about.html
+
+# Allow download of tar.gz, tar.bz2 and zip-files
+snapshots=tar.gz tar.bz2
+
+# List of common mimetypes
+mimetype.gif=image/gif
+mimetype.html=text/html
+mimetype.jpg=image/jpeg
+mimetype.jpeg=image/jpeg
+mimetype.pdf=application/pdf
+mimetype.png=image/png
+mimetype.svg=image/svg+xml
+
+# time-to-live settings: specify how long (in minutes) different pages should
+# be cached. specify 0 for instant expiration and -1 for immortal pages
+
+# ttl for root page (repo listing)
+cache-root-ttl=0
+
+# ttl for repo summary page
+cache-repo-ttl=0
+
+# ttl for other dynamic pages
+cache-dynamic-ttl=0
+
+# ttl for static pages (addressed by SHA-1)
+cache-static-ttl=0
+
+# Specify some default clone urls using macro expansion
+#clone-url=git://cgit/$CGIT_REPO_URL git@cgit:$CGIT_REPO_URL
+
+# Show owner on index page
+enable-index-owner=1
+
+# Allow http transport git clone
+enable-git-clone=0
+
+# Enable syntax highlighting (requires the highlight package)
+source-filter=/usr/libexec/cgit/filters/syntax-highlighting.sh
+
+# through the right converters
+about-filter=/usr/libexec/cgit/filters/about-formatting.sh
+
+readme=:README.md
+readme=:readme.md
+readme=:README.mkd
+readme=:readme.mkd
+readme=:README.rst
+readme=:readme.rst
+readme=:README.html
+readme=:readme.html
+readme=:README.htm
+readme=:readme.htm
+readme=:README.txt
+readme=:readme.txt
+readme=:README
+readme=:readme
+readme=:INSTALL.md
+readme=:install.md
+readme=:INSTALL.mkd
+readme=:install.mkd
+readme=:INSTALL.mkd
+readme=:install.mkd
+readme=:INSTALL.rst
+readme=:install.rst
+readme=:INSTALL.html
+readme=:install.html
+readme=:INSTALL.htm
+readme=:install.htm
+readme=:INSTALL.txt
+readme=:install.txt
+readme=:INSTALL
+readme=:install
+
+##
+## List of repositories.
+## PS: Any repositories listed when section is unset will not be
+##     displayed under a section heading
+## PPS: This list could be kept in a different file (e.g. '/etc/cgitrepos')
+##      and included like this:
+##        include=/etc/cgitrepos
+##
+
+enable-git-config=1
+#enable-gitweb-owner=1
+remove-suffix=1
+project-list=/home/git/projects/projects.list
+scan-path=/home/git/repositories/
+
+#repo.url=foo
+#repo.path=/home/git/foo.git
+#repo.desc=the master foo repository
+#repo.owner=fooman@example.com
+#repo.readme=info/web/about.html
