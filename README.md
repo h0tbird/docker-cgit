@@ -9,11 +9,7 @@ cd docker-cgit
 
 Install and run:
 ```
-sudo ln cgit.service /etc/systemd/system/cgit.service
-sudo ln bin/runctl /usr/local/sbin/runctl-cgit
-sudo mkdir /etc/bootpaas
-sudo cp cgit.conf /etc/bootpaas
-sudo systemctl daemon-reload
+sudo ./bin/install
 sudo systemctl start cgit
 ```
 
