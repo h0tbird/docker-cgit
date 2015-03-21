@@ -1,5 +1,5 @@
 [Unit]
-Description=CGit Server
+Description=CGit container
 After=docker.service boot.service
 Requires=docker.service gito.service
 Wants=boot.service
@@ -9,31 +9,14 @@ Restart=on-failure
 RestartSec=20
 TimeoutStartSec=0
 
-#---------------------------------
 # Preparations for the container:
-#---------------------------------
+ExecStartPre=-/usr/local/sbin/runctl-cgit pre
 
-ExecStartPre=-/usr/sbin/docker kill cgit01
-ExecStartPre=-/usr/sbin/docker rm cgit01
-ExecStartPre=-/usr/sbin/docker pull h0tbird/cgit:latest
-
-#----------------------
 # Start the container:
-#----------------------
+ExecStart=/usr/local/sbin/runctl-cgit start
 
-ExecStart=/usr/bin/sh -c "docker run -t \
-  --volumes-from gito01 \
-  --name         cgit01 \
-  --net          container:gito01 \
-  --env          WAIT_IFACE=eth1 \
-  --env          SERVER_NAME=cgit01.demo.lan \
-  h0tbird/cgit:latest"
-
-#---------------------
 # Stop the container:
-#---------------------
-
-ExecStop=/usr/sbin/docker stop cgit01
+ExecStop=/usr/local/sbin/runctl-cgit stop
 
 [Install]
 WantedBy=multi-user.target

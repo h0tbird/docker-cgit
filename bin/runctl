@@ -1,0 +1,60 @@
+#!/bin/bash
+
+#------------------------------------------------------------------------------
+# Global constants:
+#------------------------------------------------------------------------------
+
+readonly DOCKER=`which docker`
+readonly IPCMD=`which ip`
+readonly BRCTL=`which brctl`
+
+#------------------------------------------------------------------------------
+# Source the configuration:
+#------------------------------------------------------------------------------
+
+[ -f /etc/bootpaas/cgit.conf ] && . /etc/bootpaas/cgit.conf || exit 99
+
+#------------------------------------------------------------------------------
+# To be called by ExecStartPre:
+#------------------------------------------------------------------------------
+
+function run_pre {
+  $DOCKER kill $ID || exit 1
+  $DOCKER rm $ID || exit 2
+  $DOCKER pull $IMAGE && return 0
+}
+
+#------------------------------------------------------------------------------
+# To be called by ExecStart:
+#------------------------------------------------------------------------------
+
+function run_start {
+  sleep 5 && exec $DOCKER run -t \
+  --volumes-from gito01 \
+  --name         $ID \
+  --net          container:gito01 \
+  --env          WAIT_IFACE=eth1 \
+  --env          SERVER_NAME=$HOSTNAME \
+  $IMAGE
+}
+
+#------------------------------------------------------------------------------
+# To be called by ExecStop:
+#------------------------------------------------------------------------------
+
+function run_stop {
+
+  $DOCKER stop $ID || exit 1
+
+  $BRCTL show | grep -q veth-${ID} && {
+    $IPCMD link del veth-${ID} || exit 2
+  }
+
+  return 0
+}
+
+#------------------------------------------------------------------------------
+# Entry point:
+#------------------------------------------------------------------------------
+
+case $1 in pre|start|stop) run_$1 ;; esac
