@@ -33,7 +33,7 @@ function run_start {
   --volumes-from gito01 \
   --name         $ID \
   --net          container:gito01 \
-  --env          WAIT_IFACE=eth1 \
+  --env          WAIT_NETWORK=true \
   --env          SERVER_NAME=$HOSTNAME \
   $IMAGE
 }
