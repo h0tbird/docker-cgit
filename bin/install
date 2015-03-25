@@ -5,8 +5,8 @@ ln -f cgit.service /etc/systemd/system/cgit.service
 ln -f bin/runctl /usr/local/sbin/runctl-cgit
 
 # Populate config if not present:
-[ -d /etc/bootpaas ] || mkdir /etc/bootpaas
-[ ! -f /etc/bootpaas/cgit.conf ] && cp cgit.conf /etc/bootpaas/
+[ -d /etc/booddies ] || mkdir /etc/booddies
+[ ! -f /etc/booddies/cgit.conf ] && cp cgit.conf /etc/booddies/
 
 # Reload systemd:
 systemctl daemon-reload

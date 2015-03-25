@@ -12,7 +12,7 @@ readonly BRCTL=`which brctl`
 # Source the configuration:
 #------------------------------------------------------------------------------
 
-[ -f /etc/bootpaas/cgit.conf ] && . /etc/bootpaas/cgit.conf || exit 99
+[ -f /etc/booddies/cgit.conf ] && . /etc/booddies/cgit.conf || exit 99
 
 #------------------------------------------------------------------------------
 # To be called by ExecStartPre:
