@@ -9,13 +9,17 @@ readonly IPCMD=`which ip`
 readonly BRCTL=`which brctl`
 
 #------------------------------------------------------------------------------
-# Source the configuration:
+# Source and verify the configuration:
 #------------------------------------------------------------------------------
 
 [ -f /etc/booddies/cgit.conf ] && . /etc/booddies/cgit.conf || exit 99
 
+[ -z "$ID" ] && echo 'Ops! ID is not set' && exit 99
+[ -z "$IMAGE" ] && echo 'Ops! IMAGE is not set' && exit 99
+[ -z "$HOSTNAME" ] && echo 'Ops! HOSTNAME is not set' && exit 99
+
 #------------------------------------------------------------------------------
-# To be called by ExecStartPre:
+# Function to be called by ExecStartPre:
 #------------------------------------------------------------------------------
 
 function run_pre {
@@ -94,7 +98,7 @@ function run_pre {
 }
 
 #------------------------------------------------------------------------------
-# To be called by ExecStart:
+# Function to be called by ExecStart:
 #------------------------------------------------------------------------------
 
 function run_start {
@@ -103,12 +107,12 @@ function run_start {
   --name         $ID \
   --net          container:gito01 \
   --env          WAIT_NETWORK=true \
-  --env          SERVER_NAME=$HOSTNAME \
+  --env          SERVER_NAME=${HOSTNAME} \
   $IMAGE
 }
 
 #------------------------------------------------------------------------------
-# To be called by ExecStop:
+# Function to be called by ExecStop:
 #------------------------------------------------------------------------------
 
 function run_stop {
@@ -117,11 +121,11 @@ function run_stop {
   # Stop the container if it is running:
   #--------------------------------------
 
-  local MSG1="[Stop] Checking whether '$ID' container is running..."
-  local MSG2="[Stop] The container '$ID' is running, stopping it..."
-  local MSG3="[Stop] OK! The container '$ID' has been stopped"
-  local MSG4="[Stop] Ops! Failed to stop the container '$ID'"
-  local MSG5="[Stop] OK! The container '$ID' is not running"
+  local MSG1="[Stop] Checking whether '${ID}' container is running..."
+  local MSG2="[Stop] The container '${ID}' is running, stopping it..."
+  local MSG3="[Stop] OK! The container '${ID}' has been stopped"
+  local MSG4="[Stop] Ops! Failed to stop the container '${ID}'"
+  local MSG5="[Stop] OK! The container '${ID}' is not running"
 
   echo $MSG1; $DOCKER ps | grep -q $ID && {
   echo $MSG2; $DOCKER stop $ID &> /dev/null && echo $MSG3 || {
