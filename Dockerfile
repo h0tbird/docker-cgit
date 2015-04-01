@@ -2,20 +2,16 @@
 # Set the base image for subsequent instructions:
 #------------------------------------------------------------------------------
 
-FROM centos
+FROM centos:7
 MAINTAINER Marc Villacorta Morera <marc.villacorta@gmail.com>
-
-#------------------------------------------------------------------------------
-# Update the base image:
-#------------------------------------------------------------------------------
-
-RUN yum update -y
 
 #------------------------------------------------------------------------------
 # Install:
 #------------------------------------------------------------------------------
 
+RUN rpm --import http://mirror.centos.org/centos/7/os/x86_64/RPM-GPG-KEY-CentOS-7
 RUN rpm --import http://dl.fedoraproject.org/pub/epel/RPM-GPG-KEY-EPEL-7
+RUN yum update -y
 RUN yum install -y epel-release
 RUN yum install -y cgit highlight policycoreutils-python httpd
 RUN adduser -m git && chmod 755 /home/git && \
