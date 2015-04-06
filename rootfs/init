@@ -34,6 +34,8 @@ echo '[Init] Configuring the service...'
   sed -i "s/XXX-SERVER_NAME-XXX/$SERVER_NAME/" /etc/httpd/conf.d/25-cgit.conf
 }
 
+chown -R git:apache /home/git/{projects,repositories}
+
 #------------------------------------------------------------------------------
 # Run:
 #------------------------------------------------------------------------------
