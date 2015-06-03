@@ -4,19 +4,23 @@
 # Global constants:
 #------------------------------------------------------------------------------
 
-readonly DOCKER=`which docker`
-readonly IPCMD=`which ip`
-readonly BRCTL=`which brctl`
+# Return codes:
+readonly E_BAD_CMD=10
+readonly E_BAD_CONF=11
+
+# Commands:
+readonly CMD_DOCKER=$(type -P docker); [ -z "${CMD_DOCKER}" ] && exit ${E_BAD_CMD}
 
 #------------------------------------------------------------------------------
 # Source and verify the configuration:
 #------------------------------------------------------------------------------
 
-[ -f /etc/booddies/cgit.conf ] && . /etc/booddies/cgit.conf || exit 99
+[ -f /etc/booddies/cgit.conf ] && \
+source /etc/booddies/cgit.conf || exit ${E_BAD_CONF}
 
-[ -z "$ID" ] && echo 'Ops! ID is not set' && exit 99
-[ -z "$IMAGE" ] && echo 'Ops! IMAGE is not set' && exit 99
-[ -z "$HOSTNAME" ] && echo 'Ops! HOSTNAME is not set' && exit 99
+[ -z "${ID}" ] && echo 'Ops! ID is not set' && exit ${E_BAD_CONF}
+[ -z "${IMAGE}" ] && echo 'Ops! IMAGE is not set' && exit ${E_BAD_CONF}
+[ -z "${HOSTNAME}" ] && echo 'Ops! HOSTNAME is not set' && exit ${E_BAD_CONF}
 
 #------------------------------------------------------------------------------
 # Function to be called by ExecStartPre:
@@ -24,77 +28,37 @@ readonly BRCTL=`which brctl`
 
 function run_pre {
 
-  #--------------------------------------
   # Kill the container if it is running:
-  #--------------------------------------
+  local MSG1="[Pre] Checking whether '${ID}' container is running..."
+  local MSG2="[Pre] The container '${ID}' is running, killing it..."
+  local MSG3="[Pre] OK! The container '${ID}' has been killed"
+  local MSG4="[Pre] Ops! Failed to kill the container '${ID}'"
+  local MSG5="[Pre] OK! The container '${ID}' is not running"
+  echo ${MSG1}; ${CMD_DOCKER} ps | grep -q ${ID} && {
+  echo ${MSG2}; ${CMD_DOCKER} kill ${ID} &> /dev/null && echo ${MSG3} || {
+  echo ${MSG4}; exit 2; } } || echo ${MSG5}
 
-  local MSG1="[Pre] Checking whether '$ID' container is running..."
-  local MSG2="[Pre] The container '$ID' is running, killing it..."
-  local MSG3="[Pre] OK! The container '$ID' has been killed"
-  local MSG4="[Pre] Ops! Failed to kill the container '$ID'"
-  local MSG5="[Pre] OK! The container '$ID' is not running"
-
-  echo $MSG1; $DOCKER ps | grep -q $ID && {
-  echo $MSG2; $DOCKER kill $ID &> /dev/null && echo $MSG3 || {
-  echo $MSG4; exit 2; } } || echo $MSG5
-
-  #-----------------------------------------
   # Delete the container if it does exists:
-  #-----------------------------------------
+  local MSG1="[Pre] Checking whether '${ID}' container exists..."
+  local MSG2="[Pre] The container '${ID}' exists, deleting it..."
+  local MSG3="[Pre] OK! The container '${ID}' has been deleted"
+  local MSG4="[Pre] Ops! Failed to delete the container '${ID}'"
+  local MSG5="[Pre] OK! The container '${ID}' does not exists"
+  echo ${MSG1}; ${CMD_DOCKER} ps -a | grep -q ${ID} && {
+  echo ${MSG2}; ${CMD_DOCKER} rm ${ID} &> /dev/null && echo ${MSG3} || {
+  echo ${MSG4}; exit 3; } } || echo ${MSG5}
 
-  local MSG1="[Pre] Checking whether '$ID' container exists..."
-  local MSG2="[Pre] The container '$ID' exists, deleting it..."
-  local MSG3="[Pre] OK! The container '$ID' has been deleted"
-  local MSG4="[Pre] Ops! Failed to delete the container '$ID'"
-  local MSG5="[Pre] OK! The container '$ID' does not exists"
-
-  echo $MSG1; $DOCKER ps -a | grep -q $ID && {
-  echo $MSG2; $DOCKER rm $ID &> /dev/null && echo $MSG3 || {
-  echo $MSG4; exit 3; } } || echo $MSG5
-
-  #----------------------------------------------------
-  # Delete the host-side network interface if present:
-  #----------------------------------------------------
-
-  local MSG1="[Pre] Checking whether 'veth-${ID}' interface exists..."
-  local MSG2="[Pre] The interface 'veth-${ID}' exists, deleting it..."
-  local MSG3="[Pre] OK! The interface 'veth-${ID}' has been deleted"
-  local MSG4="[Pre] Ops! Failed to delete the interface 'veth-${ID}'"
-  local MSG5="[Pre] OK! The interface 'veth-${ID}' does not exists"
-
-  echo $MSG1; $IPCMD l show dev veth-${ID} &> /dev/null && {
-  echo $MSG2; $IPCMD link del veth-${ID} &> /dev/null && echo $MSG3 || {
-  echo $MSG4; exit 4; } } || echo $MSG5
-
-  #----------------------------------------------------
-  # Create the host's bridge interface if not present:
-  #----------------------------------------------------
-
-  local MSG1="[Pre] Checking whether 'br0' interface exists..."
-  local MSG2="[Pre] The interface 'br0' is not present, creating it..."
-  local MSG3="[Pre] OK! The interface 'br0' has been created"
-  local MSG4="[Pre] Ops! Failed to create interface 'br0'"
-  local MSG5="[Pre] OK! The interface 'br0' exists"
-
-  echo $MSG1; ! $IPCMD l show dev br0 &> /dev/null && {
-  echo $MSG2; $BRCTL addbr br0 && echo $MSG3 || {
-  echo $MSG4; exit 5; } } || echo $MSG5
-
-  #-------------------------------------------------------------
   # Download the image if not present or is tagged as 'latest':
-  #-------------------------------------------------------------
-
-  local MSG1="[Pre] Checking if '$IMAGE' has to be downloaded..."
-  local MSG2="[Pre] Yes, downloading the image '$IMAGE' now..."
-  local MSG3="[Pre] OK! The image '$IMAGE' is up to date"
-  local MSG4="[Pre] Ops! Failed to download the image '$IMAGE'"
-  local MSG5="[Pre] OK! The image '$IMAGE' already exists"
-
-  (! $DOCKER images | grep -q $IMAGE); COND1=$?
-  $DOCKER images | grep $IMAGE | grep -q latest; COND2=$?
-  echo $MSG1; [[ "$COND1" -eq 0 || "$COND2" -eq 0 ]] && {
-  echo $MSG2; $DOCKER pull $IMAGE &> /dev/null && echo $MSG3 || {
-  echo $MSG4; exit 6; } } || echo $MSG5
+  local MSG1="[Pre] Checking if '${IMAGE}' has to be downloaded..."
+  local MSG2="[Pre] Yes, downloading the image '${IMAGE}' now..."
+  local MSG3="[Pre] OK! The image '${IMAGE}' is up to date"
+  local MSG4="[Pre] Ops! Failed to download the image '${IMAGE}'"
+  local MSG5="[Pre] OK! The image '${IMAGE}' already exists"
+  (! ${CMD_DOCKER} images | grep -q ${IMAGE}); COND1=$?
+  ${CMD_DOCKER} images | grep ${IMAGE} | grep -q latest; COND2=$?
+  echo ${MSG1}; [[ "${COND1}" -eq 0 || "${COND2}" -eq 0 ]] && {
+  echo ${MSG2}; ${CMD_DOCKER} pull ${IMAGE} &> /dev/null && echo ${MSG3} || {
+  echo ${MSG4}; exit 4; } } || echo ${MSG5}
 }
 
 #------------------------------------------------------------------------------
@@ -102,13 +66,13 @@ function run_pre {
 #------------------------------------------------------------------------------
 
 function run_start {
-  sleep 5 && exec $DOCKER run -t \
+  sleep 5 && exec ${CMD_DOCKER} run -t \
   --volumes-from gito01 \
-  --name         $ID \
+  --name         ${ID} \
   --net          container:gito01 \
   --env          WAIT_NETWORK=true \
   --env          SERVER_NAME=${HOSTNAME} \
-  $IMAGE
+  ${IMAGE}
 }
 
 #------------------------------------------------------------------------------
@@ -117,33 +81,15 @@ function run_start {
 
 function run_stop {
 
-  #--------------------------------------
   # Stop the container if it is running:
-  #--------------------------------------
-
   local MSG1="[Stop] Checking whether '${ID}' container is running..."
   local MSG2="[Stop] The container '${ID}' is running, stopping it..."
   local MSG3="[Stop] OK! The container '${ID}' has been stopped"
   local MSG4="[Stop] Ops! Failed to stop the container '${ID}'"
   local MSG5="[Stop] OK! The container '${ID}' is not running"
-
-  echo $MSG1; $DOCKER ps | grep -q $ID && {
-  echo $MSG2; $DOCKER stop $ID &> /dev/null && echo $MSG3 || {
-  echo $MSG4; exit 2; } } || echo $MSG5
-
-  #----------------------------------------------------
-  # Delete the host-side network interface if present:
-  #----------------------------------------------------
-
-  local MSG1="[Stop] Checking whether 'veth-${ID}' interface exists..."
-  local MSG2="[Stop] The interface 'veth-${ID}' exists, deleting it..."
-  local MSG3="[Stop] OK! The interface 'veth-${ID}' has been deleted"
-  local MSG4="[Stop] Ops! Failed to delete the interface 'veth-${ID}'"
-  local MSG5="[Stop] OK! The interface 'veth-${ID}' does not exists"
-
-  echo $MSG1; $IPCMD l show dev veth-${ID} &> /dev/null && {
-  echo $MSG2; $IPCMD link del veth-${ID} &> /dev/null && echo $MSG3 || {
-  echo $MSG4; exit 2; } } || echo $MSG5
+  echo ${MSG1}; ${CMD_DOCKER} ps | grep -q ${ID} && {
+  echo ${MSG2}; ${CMD_DOCKER} stop ${ID} &> /dev/null && echo ${MSG3} || {
+  echo ${MSG4}; exit 2; } } || echo ${MSG5}
 }
 
 #------------------------------------------------------------------------------
