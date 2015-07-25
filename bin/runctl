@@ -48,14 +48,14 @@ function run_pre {
   echo ${MSG2}; ${CMD_DOCKER} rm ${ID} &> /dev/null && echo ${MSG3} || {
   echo ${MSG4}; exit 3; } } || echo ${MSG5}
 
-  # Download the image if not present or is tagged as 'latest':
+  # Download the image if not present FORCE_PULL_IMAGE is true:
   local MSG1="[Pre] Checking if '${IMAGE}' has to be downloaded..."
   local MSG2="[Pre] Yes, downloading the image '${IMAGE}' now..."
   local MSG3="[Pre] OK! The image '${IMAGE}' is up to date"
   local MSG4="[Pre] Ops! Failed to download the image '${IMAGE}'"
   local MSG5="[Pre] OK! The image '${IMAGE}' already exists"
-  (! ${CMD_DOCKER} images | grep -q ${IMAGE}); COND1=$?
-  ${CMD_DOCKER} images | grep ${IMAGE} | grep -q latest; COND2=$?
+  (! ${CMD_DOCKER} images | grep "${IMAGE%%:*}" | grep -q "${IMAGE##*:}"); COND1=$?
+  [ "${FORCE_PULL_IMAGE}" == 'true' ]; COND2=$?
   echo ${MSG1}; [[ "${COND1}" -eq 0 || "${COND2}" -eq 0 ]] && {
   echo ${MSG2}; ${CMD_DOCKER} pull ${IMAGE} &> /dev/null && echo ${MSG3} || {
   echo ${MSG4}; exit 4; } } || echo ${MSG5}
