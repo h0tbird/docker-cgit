@@ -12,28 +12,11 @@ readonly E_BAD_MKDIR=12
 readonly E_BAD_CP=13
 
 #------------------------------------------------------------------------------
-# Source and verify the configuration:
-#------------------------------------------------------------------------------
-
-[ -f cgit.conf ] && \
-  source cgit.conf || exit ${E_BAD_CONF}
-
-[ -z "${DATA_DIR}" ] && echo 'Ops! DATA_DIR is not set' && exit ${E_BAD_CONF}
-[ -z "${LOG_FILE}" ] && echo 'Ops! LOG_FILE is not set' && exit ${E_BAD_CONF}
-
-#------------------------------------------------------------------------------
 # Source miscellaneous bash functions:
 #------------------------------------------------------------------------------
 
 [ -f ../../bin/booddies.sh ] && \
   source ../../bin/booddies.sh || exit ${E_BAD_CONF}
-
-#------------------------------------------------------------------------------
-# Create data and logs directories:
-#------------------------------------------------------------------------------
-
-[ -d "${DATA_DIR}" ] || mkdir -p ${DATA_DIR}
-[ -d "$(dirname ${LOG_FILE})" ] || mkdir -p $(dirname ${LOG_FILE})
 
 #------------------------------------------------------------------------------
 # Install /etc/systemd/system/cgit.service
