@@ -1,7 +1,8 @@
 # docker-cgit
 
 [![Build Status](https://travis-ci.org/h0tbird/docker-cgit.svg?branch=master)](https://travis-ci.org/h0tbird/docker-cgit)
-[![](https://badge.imagelayers.io/h0tbird/cgit:latest.svg)](https://imagelayers.io/?images=h0tbird/cgit:latest 'Get your own badge on imagelayers.io')
+[![](https://img.shields.io/imagelayers/image-size/h0tbird/cgit/latest.svg)](https://imagelayers.io/?images=h0tbird/cgit:latest)
+[![](https://img.shields.io/imagelayers/layers/h0tbird/cgit/latest.svg)](https://imagelayers.io/?images=h0tbird/cgit:latest)
 
 This container is member of the [*booddies*](https://github.com/h0tbird/booddies) fellowship.
 
